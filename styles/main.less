@@ -1,3 +1,5 @@
+@import 'ui-variables';
+
 .ai-thread-sidebar-panel {
   padding: 10px;
 }
@@ -46,6 +48,13 @@
   box-sizing: border-box;
   margin-bottom: 8px;
   resize: vertical;
+  color: @text-color;
+  background-color: @background-primary;
+  border: 1px solid @input-border-color;
+
+  &::placeholder {
+    color: @text-color-subtle;
+  }
 }
 
 .ai-thread-sidebar-preferences {
