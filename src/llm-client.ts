@@ -29,6 +29,7 @@ const SUMMARIZE_PROMPT_PREFIX = `Summarize the following email thread in 3-6 sho
 Focus on: key points discussed, any decisions made, and any open
 action items or unanswered questions. Be terse — this is for someone
 who has already read the thread and wants a quick refresher.
+Write the summary in the predominant language of the email thread.
 
 THREAD:
 `;
@@ -48,6 +49,10 @@ The person wants to say the following (their rough notes, possibly informal
 or incomplete — rephrase and expand this into a polished, appropriately
 toned reply body, but keep their intent and key points; don't invent new
 facts, commitments, or details that weren't in their notes or the thread):
+
+Write the reply in the same language as the user's notes. If the notes
+are too short or language-neutral to determine that, use the predominant
+language of the email thread.
 
 USER'S NOTES:
 ${userInput}
