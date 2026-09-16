@@ -1,0 +1,25 @@
+{
+  "name": "mailspring-ai-copilot",
+  "version": "0.1.0",
+  "main": "./lib/main.js",
+  "description": "AI copilot for Mailspring: summarize email threads and draft AI-assisted replies using your own OpenAI, Anthropic, or OpenRouter API key.",
+  "engines": {
+    "mailspring": "*"
+  },
+  "windowTypes": {
+    "default": true
+  },
+  "syncInit": false,
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "react": "17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "@types/react": "^17.0.0",
+    "typescript": "^5.4.0"
+  }
+}

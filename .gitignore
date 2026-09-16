@@ -1,0 +1,12 @@
+node_modules/
+
+# Never commit real credentials. AppEnv.config.json is Mailspring's own
+# local config store (contains this plugin's API key at runtime) and must
+# never live inside the repo.
+*.env
+.env.*
+AppEnv.config.json
+config.json
+
+.DS_Store
+*.log
