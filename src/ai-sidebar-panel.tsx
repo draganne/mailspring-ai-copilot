@@ -13,13 +13,15 @@ const DEFAULT_MODELS: Record<string, string> = {
   openai: 'gpt-4o-mini',
   anthropic: 'claude-3-5-haiku-20241022',
   openrouter: 'openai/gpt-4o-mini',
+  'openai-compatible': 'local-model',
 };
 
 function getConfiguredLLM() {
   const provider = AppEnv.config.get('ai-thread-sidebar.provider') || 'openai';
   const apiKey = AppEnv.config.get('ai-thread-sidebar.apiKey') || '';
   const model = AppEnv.config.get('ai-thread-sidebar.model') || DEFAULT_MODELS[provider];
-  return { provider, apiKey, model };
+  const baseUrl = AppEnv.config.get('ai-thread-sidebar.baseUrl') || '';
+  return { provider, apiKey, model, baseUrl };
 }
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -90,7 +92,7 @@ export default class AISidebarPanel extends React.Component<{}, State> {
     this.setState({ status: 'loading', error: '', summary: '' });
 
     try {
-      const { provider, apiKey, model } = getConfiguredLLM();
+      const { provider, apiKey, model, baseUrl } = getConfiguredLLM();
 
       const messages = MessageStore.items() || [];
       if (messages.length === 0) {
@@ -102,7 +104,7 @@ export default class AISidebarPanel extends React.Component<{}, State> {
         throw new Error('Could not read any message content from this thread.');
       }
 
-      const summary = await summarizeThread({ provider, apiKey, model, threadText: text });
+      const summary = await summarizeThread({ provider, apiKey, model, threadText: text, baseUrl });
 
       if (this._currentThreadId() !== this.state.threadId) {
         // Thread changed while the request was in flight; discard the result.
@@ -124,7 +126,7 @@ export default class AISidebarPanel extends React.Component<{}, State> {
     this.setState({ replyStatus: 'loading', replyError: '' });
 
     try {
-      const { provider, apiKey, model } = getConfiguredLLM();
+      const { provider, apiKey, model, baseUrl } = getConfiguredLLM();
 
       const thread = FocusedContentStore.focused('thread');
       const messages = MessageStore.items() || [];
@@ -142,6 +144,7 @@ export default class AISidebarPanel extends React.Component<{}, State> {
         provider,
         apiKey,
         model,
+        baseUrl,
         threadText,
         userInput: this.state.replyInput,
       });
