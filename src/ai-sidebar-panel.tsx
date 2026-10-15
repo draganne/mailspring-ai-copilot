@@ -18,7 +18,7 @@ const DEFAULT_MODELS: Record<string, string> = {
 
 // Approximate size of the right-click menu, used to keep it inside the window.
 const MENU_WIDTH = 150;
-const MENU_HEIGHT = 32;
+const MENU_HEIGHT = 64;
 
 // Mirrors Mailspring's own `isTextInput` (app/src/window-event-handler.ts): the
 // app routes mod+A to the focused text field and to "select all threads"
@@ -52,7 +52,7 @@ interface State {
   replyStatus: Status;
   replyError: string;
 
-  contextMenu: { x: number; y: number; text: string } | null;
+  contextMenu: { x: number; y: number; text: string; canSelectAll: boolean } | null;
 }
 
 export default class AISidebarPanel extends React.Component<{}, State> {
@@ -60,6 +60,7 @@ export default class AISidebarPanel extends React.Component<{}, State> {
 
   _unsubscribes: Array<() => void> = [];
   _menuListenersAttached = false;
+  _panelEl: HTMLDivElement | null = null;
 
   constructor(props: {}) {
     super(props);
@@ -199,15 +200,18 @@ export default class AISidebarPanel extends React.Component<{}, State> {
 
     event.preventDefault();
     event.stopPropagation();
+    this._selectSummary();
+  };
 
-    const summary = event.currentTarget.querySelector('.ai-thread-sidebar-summary');
+  _selectSummary() {
+    const summary = this._panelEl && this._panelEl.querySelector('.ai-thread-sidebar-summary');
     const selection = window.getSelection();
     if (!summary || !selection) return;
     const range = document.createRange();
     range.selectNodeContents(summary);
     selection.removeAllRanges();
     selection.addRange(range);
-  };
+  }
 
   _summarySelectionText = (panel: HTMLElement): string => {
     const selection = window.getSelection();
@@ -231,9 +235,15 @@ export default class AISidebarPanel extends React.Component<{}, State> {
         x: Math.min(event.clientX, window.innerWidth - MENU_WIDTH),
         y: Math.min(event.clientY, window.innerHeight - MENU_HEIGHT),
         text: this._summarySelectionText(panel),
+        canSelectAll: !!(this._panelEl && this._panelEl.querySelector('.ai-thread-sidebar-summary')),
       },
     });
     this._attachMenuListeners();
+  };
+
+  _onContextMenuSelectAll = () => {
+    this._selectSummary();
+    this._closeContextMenu();
   };
 
   _closeContextMenu = () => {
@@ -304,6 +314,16 @@ export default class AISidebarPanel extends React.Component<{}, State> {
         >
           Copy
         </button>
+        <div className="ai-thread-sidebar-context-menu-divider" />
+        <button
+          type="button"
+          className="ai-thread-sidebar-context-menu-item"
+          role="menuitem"
+          disabled={!menu.canSelectAll}
+          onClick={this._onContextMenuSelectAll}
+        >
+          Select all
+        </button>
       </div>
     );
   }
@@ -332,6 +352,9 @@ export default class AISidebarPanel extends React.Component<{}, State> {
     return (
       <div
         className="ai-thread-sidebar-panel"
+        ref={el => {
+          this._panelEl = el;
+        }}
         onKeyDownCapture={this._onPanelKeyDownCapture}
         onContextMenu={this._onPanelContextMenu}
       >
